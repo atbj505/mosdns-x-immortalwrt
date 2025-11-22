@@ -22,7 +22,9 @@ jobs:
         run: |
           wget https://downloads.immortalwrt.org/releases/24.10.4/targets/rockchip/armv8/immortalwrt-sdk-24.10.4-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst
           tar --zstd -xf immortalwrt-sdk-24.10.4-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst
-          mv immortalwrt-sdk-* sdk
+          SDK_DIR=$(find . -maxdepth 1 -type d -name "immortalwrt-sdk-*" | head -n 1)
+          echo "Found SDK directory: $SDK_DIR"
+          mv "$SDK_DIR" sdk
 
       - name: Prepare SDK
         run: |
