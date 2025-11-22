@@ -1,0 +1,91 @@
+name: Build mosdns-x for NanoPi R3S
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential clang flex bison g++ gawk \
+            gcc-multilib g++-multilib gettext git libncurses5-dev libssl-dev \
+            python3-distutils zlib1g-dev file wget unzip zstd
+
+      - name: Download ImmortalWrt SDK (armvirt/64 for NanoPi R3S)
+        run: |
+          wget https://downloads.immortalwrt.org/releases/24.10.4/targets/rockchip/armv8/immortalwrt-sdk-24.10.4-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst
+          tar --zstd -xf immortalwrt-sdk-24.10.4-rockchip-armv8_gcc-13.3.0_musl.Linux-x86_64.tar.zst
+          mv immortalwrt-sdk-* sdk
+
+      - name: Prepare SDK
+        run: |
+          cd sdk
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: Add mosdns-x package with Makefile
+        run: |
+          mkdir -p sdk/package/mosdns-x
+          cat << 'EOF' > sdk/package/mosdns-x/Makefile
+          include $(TOPDIR)/rules.mk
+
+          PKG_NAME:=mosdns-x
+          PKG_VERSION:=1.0
+          PKG_RELEASE:=1
+
+          PKG_SOURCE_PROTO:=git
+          PKG_SOURCE_URL:=https://github.com/pmkol/mosdns-x
+          PKG_SOURCE_VERSION:=HEAD
+          PKG_MIRROR_HASH:=skip
+
+          PKG_LICENSE:=GPL-3.0
+          PKG_LICENSE_FILES:=LICENSE
+
+          PKG_BUILD_DEPENDS:=golang/host
+          PKG_BUILD_PARALLEL:=1
+
+          include $(INCLUDE_DIR)/package.mk
+          include $(TOPDIR)/feeds/packages/lang/golang/golang-package.mk
+
+          define Package/mosdns-x
+            SECTION:=net
+            CATEGORY:=Network
+            TITLE:=mosdns-x DNS Server
+            URL:=https://github.com/pmkol/mosdns-x
+            DEPENDS:=$(GO_ARCH_DEPENDS)
+          endef
+
+          define Package/mosdns-x/description
+            mosdns-x - Enhanced Modular DNS Server
+          endef
+
+          define Build/Compile
+          	$(call GoPackage/Build,$(PKG_BUILD_DIR))
+          endef
+
+          define Package/mosdns-x/install
+          	$(INSTALL_DIR) $(1)/usr/bin
+          	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/mosdns-x $(1)/usr/bin/mosdns-x
+          endef
+
+          $(eval $(call BuildPackage,mosdns-x))
+          EOF
+
+      - name: Build mosdns-x
+        run: |
+          cd sdk
+          make defconfig
+          make package/mosdns-x/compile V=s
+
+      - name: Upload generated IPK
+        uses: actions/upload-artifact@v4
+        with:
+          name: mosdns-x-ipk
+          path: sdk/bin/packages/*/*/mosdns-x*.ipk
