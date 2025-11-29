@@ -2,12 +2,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mosdnsx
 PKG_VERSION:=25.11.11
-PKG_RELEASE:=1
+PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/pmkol/mosdns-x.git
-PKG_SOURCE_VERSION:=HEAD
-PKG_MIRROR_HASH:=skip
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/pmkol/mosdns-x/tar.gz/v$(PKG_VERSION)?
+PKG_HASH:=skip
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=LICENSE
