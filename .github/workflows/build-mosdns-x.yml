@@ -42,17 +42,17 @@ jobs:
 
       - name: Add mosdns-x package
         run: |
-          mkdir -p sdk/package/mosdns-x
-          cp -f Makefile sdk/package/mosdns-x/
+          mkdir -p sdk/package/mosdnsx
+          cp -f Makefile sdk/package/mosdnsx/
 
       - name: Build mosdns-x
         run: |
           cd sdk
           make defconfig
-          make package/mosdns-x/compile V=s
+          make package/mosdnsx/compile V=s
 
       - name: Upload IPK
         uses: actions/upload-artifact@v4
         with:
-          name: mosdns-x-ipk
-          path: sdk/bin/packages/*/*/mosdns-x*.ipk
+          name: mosdnsx-ipk
+          path: sdk/bin/packages/*/*/mosdnsx*.ipk
