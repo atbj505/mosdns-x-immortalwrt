@@ -17,24 +17,24 @@ include $(INCLUDE_DIR)/package.mk
 
 define Package/mosdns-x
   SECTION:=net
-  CATEGORY:=Network
-  TITLE:=mosdns-x DNS server
-  URL:=https://github.com/pmkol/mosdns-x
+	CATEGORY:=Network
+	TITLE:=mosdns-x DNS server
+	URL:=https://github.com/pmkol/mosdns-x
 endef
 
-define Package/mosdns-x/description
- Enhanced modular DNS server
+define Package/mosdns-x/conffiles
+/etc/mosdns-x/
 endef
 
 # 手动调用 system Go 1.25.4
 define Build/Compile
-        cd $(PKG_BUILD_DIR) && \
-        go build -trimpath -ldflags "-s -w" -o mosdns-x ./cmd/mosdnsx
+	cd $(PKG_BUILD_DIR) && \
+	go build -trimpath -ldflags "-s -w" -o mosdns-x ./cmd/mosdnsx
 endef
 
 define Package/mosdns-x/install
-        $(INSTALL_DIR) $(1)/usr/bin
-        $(INSTALL_BIN) $(PKG_BUILD_DIR)/mosdns-x $(1)/usr/bin/mosdns-x
+	$(INSTALL_DIR) $(1)/usr/bin
+	 $(INSTALL_BIN) $(PKG_BUILD_DIR)/mosdns-x $(1)/usr/bin/mosdns-x
 endef
 
 $(eval $(call BuildPackage,mosdns-x))
